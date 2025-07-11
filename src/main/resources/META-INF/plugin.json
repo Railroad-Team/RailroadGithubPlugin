@@ -1,0 +1,9 @@
+{
+  "id": "github",
+  "name": "GitHub Integration",
+  "version": "1.0.0",
+  "mainClass": "io.github.railroad.github.GitHubPlugin",
+  "description": "A plugin to integrate GitHub features into Railroad",
+  "author": "TurtyWurty",
+  "license": "MIT"
+}
