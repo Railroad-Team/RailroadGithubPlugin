@@ -7,8 +7,13 @@ import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 
 public class MFACodeDisplay extends RRVBox {
+
+    private final RRButton openBrowserBtn;
+
     public MFACodeDisplay(String code) {
         setSpacing(10);
         setAlignment(Pos.CENTER);
@@ -25,6 +30,7 @@ public class MFACodeDisplay extends RRVBox {
         }
 
         var copyBtn = new RRButton("github.button.copy_code");
+        copyBtn.setGraphic(new FontIcon(FontAwesomeSolid.COPY));
         copyBtn.setOnAction($ -> {
             Clipboard cb = Clipboard.getSystemClipboard();
             var content = new ClipboardContent();
@@ -32,6 +38,17 @@ public class MFACodeDisplay extends RRVBox {
             cb.setContent(content);
         });
 
-        getChildren().addAll(digitsContainer, copyBtn);
+        this.openBrowserBtn = new RRButton("github.button.open_browser");
+        openBrowserBtn.setGraphic(new FontIcon(FontAwesomeSolid.EXTERNAL_LINK_ALT));
+
+        var buttonRow = new RRHBox(10);
+        buttonRow.setAlignment(Pos.CENTER);
+        buttonRow.getChildren().addAll(copyBtn, openBrowserBtn);
+
+        getChildren().setAll(digitsContainer, buttonRow);
+    }
+
+    public RRButton getOpenBrowserButton() {
+        return openBrowserBtn;
     }
 }

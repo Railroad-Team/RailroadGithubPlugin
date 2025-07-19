@@ -2,23 +2,30 @@ package io.github.railroad.github.ui;
 
 import com.sun.javafx.application.HostServicesDelegate;
 import io.github.railroad.core.localization.LocalizationServiceLocator;
-import io.github.railroad.core.logger.LoggerServiceLocator;
 import io.github.railroad.core.ui.RRButton;
+import io.github.railroad.core.ui.RRHBox;
 import io.github.railroad.core.ui.RRListView;
 import io.github.railroad.core.ui.RRVBox;
 import io.github.railroad.core.ui.localized.LocalizedLabel;
-import io.github.railroad.github.GithubAccount;
-import io.github.railroad.github.GithubConnection;
+import io.github.railroad.github.data.GithubAccount;
+import io.github.railroad.github.GithubPlugin;
+import io.github.railroad.github.data.GithubUser;
 import io.github.railroad.github.http.AccessTokenResponse;
 import io.github.railroad.github.http.DeviceCodeResponse;
 import io.github.railroad.github.http.GithubRequests;
-import io.github.railroad.github.http.UserResponse;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -30,136 +37,128 @@ import java.util.concurrent.CompletableFuture;
 public class GithubAccountsPane extends RRVBox {
     private final RRListView<GithubAccount> accountsListView = new RRListView<>();
 
-    public GithubAccountsPane(List<GithubAccount> defaultAccounts) {
-        this.accountsListView.getItems().addAll(defaultAccounts);
-        this.accountsListView.setCellFactory(listView -> new GithubAccountListCell(account -> {
-            accountsListView.getItems().remove(account);
-
-
-        }));
+    public GithubAccountsPane(List<GithubAccount> accounts) {
+        getStylesheets().add(getClass().getResource("/assets/github/github_accounts.css").toExternalForm());
+        setPadding(new Insets(16));
+        setSpacing(10);
+        setAccounts(accounts);
+        accountsListView.setCellFactory(listView -> new GithubAccountListCell(account ->
+                accountsListView.getItems().remove(account)));
+        setFocusTraversable(false);
 
         var addButton = new RRButton("github.button.add_account");
+        addButton.setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.accounts.add_account.tooltip")));
         addButton.setOnAction($ -> showAddAccountDialog());
 
         var scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
-        scrollPane.setContent(this.accountsListView);
-        getChildren().addAll(scrollPane, addButton);
+        scrollPane.setContent(accountsListView);
+        scrollPane.setPadding(new Insets(0, 0, 10, 0));
+
+        var buttonBox = new RRHBox();
+        buttonBox.getChildren().add(addButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonBox.setPadding(new Insets(10, 0, 0, 0));
+
+        getChildren().setAll(scrollPane, buttonBox);
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
     }
 
-    private static void showAddAccountDialog() {
+    private void showAddAccountDialog() {
         var dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setTitle("Add GitHub Account");
+        dialog.setTitle(LocalizationServiceLocator.getInstance().get("github.dialog.add_account.title"));
 
         var dialogVbox = new RRVBox(20);
+        dialogVbox.setPadding(new Insets(24));
+        dialogVbox.setAlignment(Pos.CENTER);
+
+        var instructions = new LocalizedLabel("github.settings.plugins.github.accounts.description");
+        instructions.setWrapText(true);
+        instructions.getStyleClass().add("github-accounts-instructions");
+        dialogVbox.getChildren().add(instructions);
 
         var authorizeButton = new RRButton("github.button.authorize");
+        authorizeButton.setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.accounts.authorize.tooltip")));
+        dialogVbox.getChildren().add(authorizeButton);
+
+        var loadingIndicator = new ProgressIndicator();
+        loadingIndicator.setVisible(false);
+        dialogVbox.getChildren().add(loadingIndicator);
+
         authorizeButton.setOnAction($ -> {
-            DeviceCodeResponse deviceCodeResponse = GithubRequests.requestDeviceCode("repo,read:user,user:email,notifications,gist,read:org");
-            String verificationUri = deviceCodeResponse.verificationUri();
-            String userCode = deviceCodeResponse.userCode();
-            String deviceCode = deviceCodeResponse.deviceCode();
-            int interval = deviceCodeResponse.interval();
+            authorizeButton.setDisable(true);
+            loadingIndicator.setVisible(true);
+            CompletableFuture.runAsync(() -> {
+                try {
+                    DeviceCodeResponse deviceCodeResponse = GithubRequests.requestDeviceCode("repo,read:user,user:email,notifications,gist,read:org");
+                    String verificationUri = deviceCodeResponse.verificationUri();
+                    String userCode = deviceCodeResponse.userCode();
+                    String deviceCode = deviceCodeResponse.deviceCode();
+                    int interval = deviceCodeResponse.interval();
 
-            tryOpenUrl(verificationUri);
-            Stage userCodeDialog = createUserCodeDialog(userCode);
-            CompletableFuture<AccessTokenResponse> future = pollForAccessToken(deviceCode, interval, dialog);
-            userCodeDialog.showAndWait();
+                    Platform.runLater(() -> {
+                        dialogVbox.getChildren().clear();
+                        var mfaInstructions = new LocalizedLabel("github.accounts.mfa.instructions");
+                        mfaInstructions.getStyleClass().add("github-accounts-instructions");
+                        mfaInstructions.setWrapText(true);
+                        mfaInstructions.setTextAlignment(TextAlignment.CENTER);
+                        dialogVbox.getChildren().add(mfaInstructions);
 
-            future.thenAccept(response -> {
-                if (response instanceof AccessTokenResponse.SuccessResponse successResponse) {
-                    String accessToken = successResponse.getAccessToken();
-                    if (accessToken.isEmpty()) {
-                        LoggerServiceLocator.getInstance().getLogger().error("Received empty access token");
-                        return;
-                    }
+                        var codeDisplay = new MFACodeDisplay(userCode);
+                        if (codeDisplay.getChildren().size() > 1 && codeDisplay.getChildren().get(1) instanceof RRButton copyBtn) {
+                            copyBtn.setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.accounts.mfa.copy.tooltip")));
+                        }
 
-                    UserResponse userResponse = GithubRequests.requestUser(accessToken);
-                    if (userResponse == null) {
-                        LoggerServiceLocator.getInstance().getLogger().error("Failed to retrieve user information");
-                        return;
-                    }
+                        codeDisplay.getOpenBrowserButton().setOnAction($$ -> {
+                            tryOpenUrl(verificationUri);
+                            var fallbackMsg = new LocalizedLabel("github.accounts.mfa.open_browser.fallback", verificationUri);
+                            fallbackMsg.getStyleClass().add("github-mfa-fallback-msg");
+                            fallbackMsg.setWrapText(true);
+                            fallbackMsg.setTextAlignment(TextAlignment.CENTER);
+                            if (dialogVbox.getChildren().size() < 3 || !(dialogVbox.getChildren().get(2) instanceof Label)) {
+                                dialogVbox.getChildren().add(2, fallbackMsg);
+                            } else {
+                                dialogVbox.getChildren().set(2, fallbackMsg);
+                            }
 
-                    // TODO
+                            new Thread(() -> {
+                                try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+                                Platform.runLater(() -> dialogVbox.getChildren().remove(fallbackMsg));
+                            }).start();
+                        });
+                        codeDisplay.getOpenBrowserButton().setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.accounts.mfa.open_browser.tooltip")));
+                        dialogVbox.getChildren().add(codeDisplay);
+
+                        var cancelButton = new RRButton("railroad.generic.cancel");
+                        cancelButton.setOnAction($$ -> dialog.close());
+                        dialogVbox.getChildren().add(cancelButton);
+
+                        pollForAccessToken(deviceCode, interval, dialog, loadingIndicator, authorizeButton);
+                    });
+                } catch (Exception ex) {
+                    Platform.runLater(() -> {
+                        showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.device_authorization", ex.getMessage()));
+                        loadingIndicator.setVisible(false);
+                        authorizeButton.setDisable(false);
+                    });
                 }
             });
         });
 
-        var scene = new Scene(dialogVbox, 400, 200);
+        var scene = new Scene(dialogVbox, 420, 300);
         dialog.setScene(scene);
         dialog.setResizable(false);
         dialog.showAndWait();
     }
 
-    private static Stage createUserCodeDialog(String userCode) {
-        var userCodeDialog = new Stage();
-        userCodeDialog.initModality(Modality.APPLICATION_MODAL);
-        userCodeDialog.setTitle(LocalizationServiceLocator.getInstance().get("github.dialog.user_code.title"));
-
-        var userCodeVbox = new RRVBox(20);
-        var userCodeLabel = new LocalizedLabel("github.label.enter_code_in_browser");
-
-        var codeDisplay = new MFACodeDisplay(userCode);
-        userCodeVbox.getChildren().addAll(userCodeLabel, codeDisplay);
-
-        var cancelButton = new RRButton("railroad.generic.cancel");
-        cancelButton.setOnAction($ -> userCodeDialog.close());
-        userCodeVbox.getChildren().add(cancelButton);
-
-        var scene = new Scene(userCodeVbox, 300, 150);
-        userCodeDialog.setScene(scene);
-        userCodeDialog.setResizable(false);
-        return userCodeDialog;
-    }
-
-    private static CompletableFuture<AccessTokenResponse> pollForAccessToken(String deviceCode, int interval, Stage dialog) {
-        CompletableFuture<AccessTokenResponse> future = new CompletableFuture<>();
-
-        new Thread(() -> {
-            while(!Thread.interrupted()) {
-                try {
-                    AccessTokenResponse response = GithubRequests.requestAccessToken(deviceCode);
-                    if(response instanceof AccessTokenResponse.ErrorResponse errorResponse) {
-                        if(errorResponse.getErrorType() == AccessTokenResponse.ErrorType.AUTHORIZATION_PENDING) {
-                            Thread.sleep(interval * 1000L);
-                            continue;
-                        } else if(errorResponse.getErrorType() == AccessTokenResponse.ErrorType.SLOW_DOWN) {
-                            Thread.sleep((interval + 5) * 1000L);
-                            continue;
-                        } else {
-                            future.complete(errorResponse);
-                            LoggerServiceLocator.getInstance().getLogger().error("Error while polling for access token: {}", errorResponse.getErrorType());
-                            break;
-                        }
-                    }
-
-                    if(response instanceof AccessTokenResponse.SuccessResponse successResponse) {
-                        future.complete(successResponse);
-                        LoggerServiceLocator.getInstance().getLogger().info("Successfully received access token");
-
-                        Platform.runLater(() -> {
-                            Button confirmButton = createConfirmButton(successResponse.getAccessToken(), dialog);
-                            var root = new RRVBox();
-                            root.getChildren().addAll(new LocalizedLabel("github.dialog.confirm.title"), confirmButton);
-                            dialog.setScene(new Scene(root, 300, 150));
-                            dialog.showAndWait();
-                        });
-                        break;
-                    }
-                } catch (InterruptedException exception) {
-                    Thread.currentThread().interrupt();
-                    return;
-                } catch (Exception exception) {
-                    LoggerServiceLocator.getInstance().getLogger().error("Error while polling for access token", exception);
-                    return;
-                }
-            }
-        }).start();
-
-        return future;
+    private void showErrorDialog(String message) {
+        var alert = new Alert(AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private static void tryOpenUrl(String url) {
@@ -168,45 +167,28 @@ public class GithubAccountsPane extends RRVBox {
             try {
                 Desktop.getDesktop().browse(URI.create(url));
                 desktopWorked = true;
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
-        if(desktopWorked) return;
+        if (desktopWorked) return;
 
         boolean wwwBrowserWorked = false;
         try {
             new ProcessBuilder("x-www-browser", url).start();
             wwwBrowserWorked = true;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
-        if(wwwBrowserWorked) return;
+        if (wwwBrowserWorked) return;
 
         HostServicesDelegate hostServices = HostServicesDelegate.getInstance(null);
         if (hostServices != null) {
             try {
                 hostServices.showDocument(url);
-            } catch (Exception ignored) {}
-        }
-    }
-
-    private static Button createConfirmButton(String accessToken, Stage dialog) {
-        var confirmButton = new RRButton("railroad.generic.confirm");
-        confirmButton.setOnAction($ -> {
-            if (!accessToken.isEmpty()) {
-                var newAccount = new GithubAccount();
-
-                var connection = new GithubConnection(newAccount);
-                if (connection.validateProfile()) {
-                    // TODO: Get RepositoryManagerService and add the account to it
-                }
-            } else {
-                // Handle empty fields (e.g., show an error message)
+            } catch (Exception ignored) {
             }
-
-            dialog.close();
-        });
-
-        return confirmButton;
+        }
     }
 
     public List<GithubAccount> getAccounts() {
@@ -215,5 +197,87 @@ public class GithubAccountsPane extends RRVBox {
 
     public void setAccounts(List<GithubAccount> accounts) {
         accountsListView.getItems().setAll(accounts);
+    }
+
+    private void pollForAccessToken(String deviceCode, int interval, Stage parentDialog, ProgressIndicator loadingIndicator, RRButton authorizeButton) {
+        CompletableFuture.runAsync(() -> {
+            while (!Thread.interrupted() && parentDialog.isShowing()) {
+                try {
+                    AccessTokenResponse response = GithubRequests.requestAccessToken(deviceCode);
+                    if (response instanceof AccessTokenResponse.ErrorResponse errorResponse) {
+                        if (errorResponse.getErrorType() == AccessTokenResponse.ErrorType.AUTHORIZATION_PENDING) {
+                            Thread.sleep(interval * 1000L);
+                            GithubPlugin.logger.debug("Polling for access token, waiting for {} seconds", interval);
+                            continue;
+                        } else if (errorResponse.getErrorType() == AccessTokenResponse.ErrorType.SLOW_DOWN) {
+                            Thread.sleep((interval + 5) * 1000L);
+                            GithubPlugin.logger.debug("Polling for access token, slowing down, waiting for {} seconds", interval + 5);
+                            continue;
+                        } else {
+                            Platform.runLater(() -> {
+                                showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.polling_access_token", errorResponse.getErrorType().toString()));
+                                parentDialog.close();
+                                loadingIndicator.setVisible(false);
+                                authorizeButton.setDisable(false);
+                            });
+                            break;
+                        }
+                    }
+
+                    if (response instanceof AccessTokenResponse.SuccessResponse successResponse) {
+                        String accessToken = successResponse.getAccessToken();
+                        if (accessToken.isEmpty()) {
+                            GithubPlugin.logger.error("Received empty access token");
+                            Platform.runLater(() -> {
+                                showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.empty_access_token"));
+                                parentDialog.close();
+                                loadingIndicator.setVisible(false);
+                                authorizeButton.setDisable(false);
+                            });
+                            break;
+                        }
+
+                        GithubPlugin.logger.debug("Successfully received access token");
+                        GithubUser githubUser = GithubRequests.requestUser(accessToken);
+                        if (githubUser == null) {
+                            GithubPlugin.logger.error("Failed to retrieve user information");
+                            Platform.runLater(() -> {
+                                showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.user_info"));
+                                parentDialog.close();
+                                loadingIndicator.setVisible(false);
+                                authorizeButton.setDisable(false);
+                            });
+                            break;
+                        }
+
+                        GithubPlugin.logger.debug("Successfully retrieved user information: {}", githubUser);
+                        var account = new GithubAccount(githubUser);
+                        account.aliasProperty().set(githubUser.login() == null ? githubUser.name() : githubUser.login());
+                        account.setAccessToken(accessToken.toCharArray());
+                        Platform.runLater(() -> {
+                            accountsListView.getItems().add(account);
+                            GithubPlugin.logger.info("Added new GitHub account: {}", githubUser.login());
+                            parentDialog.close();
+                            loadingIndicator.setVisible(false);
+                            authorizeButton.setDisable(false);
+                        });
+                        break;
+                    }
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    GithubPlugin.logger.debug("Polling for access token interrupted");
+                    return;
+                } catch (Exception exception) {
+                    GithubPlugin.logger.error("Error while polling for access token", exception);
+                    Platform.runLater(() -> {
+                        showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.polling_access_token", exception.getMessage()));
+                        parentDialog.close();
+                        loadingIndicator.setVisible(false);
+                        authorizeButton.setDisable(false);
+                    });
+                    return;
+                }
+            }
+        });
     }
 }

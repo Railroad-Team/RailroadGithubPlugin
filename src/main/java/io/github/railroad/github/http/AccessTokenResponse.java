@@ -21,9 +21,6 @@ public abstract sealed class AccessTokenResponse permits AccessTokenResponse.Suc
         } else {
             return new SuccessResponse(
                     json.get("access_token").getAsString(),
-                    json.get("expires_in").getAsInt(),
-                    json.has("refresh_token") ? json.get("refresh_token").getAsString() : null,
-                    json.has("refresh_expires_in") ? json.get("refresh_expires_in").getAsInt() : 0,
                     json.get("scope").getAsString(),
                     json.get("token_type").getAsString()
             );
@@ -33,17 +30,11 @@ public abstract sealed class AccessTokenResponse permits AccessTokenResponse.Suc
     @Getter
     public static final class SuccessResponse extends AccessTokenResponse {
         private final String accessToken;
-        private final int accessTokenExpiresIn;
-        private final String refreshToken;
-        private final int refreshTokenExpiresIn;
         private final String scope;
         private final String tokenType;
 
-        public SuccessResponse(String accessToken, int accessTokenExpiresIn, String refreshToken, int refreshTokenExpiresIn, String scope, String tokenType) {
+        public SuccessResponse(String accessToken, String scope, String tokenType) {
             this.accessToken = accessToken;
-            this.accessTokenExpiresIn = accessTokenExpiresIn;
-            this.refreshToken = refreshToken;
-            this.refreshTokenExpiresIn = refreshTokenExpiresIn;
             this.scope = scope;
             this.tokenType = tokenType;
         }

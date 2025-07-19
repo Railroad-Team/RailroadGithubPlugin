@@ -1,0 +1,124 @@
+/* List cell root */
+.github-account-cell {
+    -fx-padding: 8 16 8 16;
+    -fx-border-color: -color-border-muted;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-color: -color-bg-default;
+    -fx-cursor: pointer;
+}
+
+/* Hover effect for account cell */
+.github-account-cell:hover {
+    -fx-background-color: -color-bg-hover;
+}
+
+/* Account info container */
+.github-account-view {
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+}
+
+/* Avatar image */
+.github-account-avatar {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 2, 0, 0, 1);
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1;
+    -fx-background-color: -color-bg-inset;
+}
+
+/* Alias label (bold, larger) */
+.github-alias-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-fg-default;
+}
+
+/* Username label (subtle, smaller) */
+.github-username-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+/* Instructions label in the add account dialog */
+.github-accounts-instructions {
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-fg-muted;
+    -fx-padding: 0 0 10 0;
+    -fx-wrap-text: true;
+    -fx-max-width: 360px;
+}
+
+/* Label in the user code dialog */
+.github-user-code-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-fg-muted;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Edit Alias Dialog root container */
+.edit-alias-dialog-root {
+    -fx-spacing: 12;
+    -fx-padding: 20;
+    -fx-background-color: -color-bg-default;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+/* Edit Alias label */
+.edit-alias-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-fg-default;
+    -fx-margin-bottom: 4;
+}
+
+/* Edit Alias input field */
+.edit-alias-field {
+    -fx-pref-width: 240px;
+    -fx-padding: 6 8 6 8;
+    -fx-background-color: -color-base-0;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-font-size: 14px;
+}
+
+/* MFA fallback message */
+.github-mfa-fallback-msg {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-warning-fg;
+    -fx-padding: 8 0 0 0;
+    -fx-font-style: italic;
+    -fx-wrap-text: true;
+    -fx-max-width: 360px;
+}
+
+.github-account-ellipsis-button {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-subtle;
+    -fx-border-width: 1px;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-padding: 0;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 2, 0.1, 0, 1);
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+    -fx-font-size: 16px;
+    -fx-transition: all 0.18s cubic-bezier(0.4,0.2,0.2,1);
+}
+
+.github-account-ellipsis-button:hover {
+    -fx-background-color: -color-accent-subtle;
+    -fx-border-color: -color-accent-emphasis;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 4, 0.15, 0, 2);
+}
+
+.github-account-ellipsis-button .mfx-font-icon {
+    -mfx-color: -color-fg-default;
+}
