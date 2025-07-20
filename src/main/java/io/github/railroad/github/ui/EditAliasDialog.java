@@ -4,12 +4,12 @@ import io.github.railroad.core.localization.LocalizationServiceLocator;
 import io.github.railroad.core.ui.RRTextField;
 import io.github.railroad.core.ui.RRVBox;
 import io.github.railroad.core.ui.localized.LocalizedLabel;
+import io.github.railroad.core.ui.localized.LocalizedTooltip;
 import io.github.railroad.github.data.GithubAccount;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Tooltip;
 
 /**
  * Style classes used in this file:
@@ -32,7 +32,7 @@ public class EditAliasDialog extends Dialog<String> {
         aliasLabel.setLabelFor(aliasField);
 
         aliasField.getStyleClass().add("edit-alias-field");
-        aliasField.setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.account.edit_alias.tooltip")));
+        aliasField.setTooltip(new LocalizedTooltip("github.account.edit_alias.tooltip"));
         aliasField.setText(account.getAlias());
 
         root.getChildren().addAll(aliasLabel, aliasField);
@@ -48,13 +48,7 @@ public class EditAliasDialog extends Dialog<String> {
         cancelButton.setText(LocalizationServiceLocator.getInstance().get("railroad.generic.cancel"));
         cancelButton.setCancelButton(true);
 
-        setResultConverter(dialogButton -> {
-            if (dialogButton == ButtonType.OK) {
-                return aliasField.getText();
-            }
-            
-            return null;
-        });
+        setResultConverter(dialogButton -> dialogButton == ButtonType.OK ? aliasField.getText() : null);
 
         setOnShown($ -> aliasField.requestFocus());
     }

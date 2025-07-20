@@ -3,7 +3,6 @@ package io.github.railroad.github.http;
 import com.google.gson.JsonObject;
 import lombok.Getter;
 
-import javax.lang.model.type.ErrorType;
 import java.util.Locale;
 
 public abstract sealed class AccessTokenResponse permits AccessTokenResponse.SuccessResponse, AccessTokenResponse.ErrorResponse {

@@ -7,8 +7,9 @@ import io.github.railroad.core.ui.RRHBox;
 import io.github.railroad.core.ui.RRListView;
 import io.github.railroad.core.ui.RRVBox;
 import io.github.railroad.core.ui.localized.LocalizedLabel;
-import io.github.railroad.github.data.GithubAccount;
+import io.github.railroad.core.ui.localized.LocalizedTooltip;
 import io.github.railroad.github.GithubPlugin;
+import io.github.railroad.github.data.GithubAccount;
 import io.github.railroad.github.data.GithubUser;
 import io.github.railroad.github.http.AccessTokenResponse;
 import io.github.railroad.github.http.DeviceCodeResponse;
@@ -22,7 +23,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
@@ -47,7 +47,7 @@ public class GithubAccountsPane extends RRVBox {
         setFocusTraversable(false);
 
         var addButton = new RRButton("github.button.add_account");
-        addButton.setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.accounts.add_account.tooltip")));
+        addButton.setTooltip(new LocalizedTooltip("github.accounts.add_account.tooltip"));
         addButton.setOnAction($ -> showAddAccountDialog());
 
         var scrollPane = new ScrollPane();
@@ -80,7 +80,7 @@ public class GithubAccountsPane extends RRVBox {
         dialogVbox.getChildren().add(instructions);
 
         var authorizeButton = new RRButton("github.button.authorize");
-        authorizeButton.setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.accounts.authorize.tooltip")));
+        authorizeButton.setTooltip(new LocalizedTooltip("github.accounts.authorize.tooltip"));
         dialogVbox.getChildren().add(authorizeButton);
 
         var loadingIndicator = new ProgressIndicator();
@@ -108,7 +108,7 @@ public class GithubAccountsPane extends RRVBox {
 
                         var codeDisplay = new MFACodeDisplay(userCode);
                         if (codeDisplay.getChildren().size() > 1 && codeDisplay.getChildren().get(1) instanceof RRButton copyBtn) {
-                            copyBtn.setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.accounts.mfa.copy.tooltip")));
+                            copyBtn.setTooltip(new LocalizedTooltip("github.accounts.mfa.copy.tooltip"));
                         }
 
                         codeDisplay.getOpenBrowserButton().setOnAction($$ -> {
@@ -128,7 +128,7 @@ public class GithubAccountsPane extends RRVBox {
                                 Platform.runLater(() -> dialogVbox.getChildren().remove(fallbackMsg));
                             }).start();
                         });
-                        codeDisplay.getOpenBrowserButton().setTooltip(new Tooltip(LocalizationServiceLocator.getInstance().get("github.accounts.mfa.open_browser.tooltip")));
+                        codeDisplay.getOpenBrowserButton().setTooltip(new LocalizedTooltip("github.accounts.mfa.open_browser.tooltip"));
                         dialogVbox.getChildren().add(codeDisplay);
 
                         var cancelButton = new RRButton("railroad.generic.cancel");
@@ -139,7 +139,7 @@ public class GithubAccountsPane extends RRVBox {
                     });
                 } catch (Exception ex) {
                     Platform.runLater(() -> {
-                        showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.device_authorization", ex.getMessage()));
+                        showErrorDialog("github.accounts.error.device_authorization", ex.getMessage());
                         loadingIndicator.setVisible(false);
                         authorizeButton.setDisable(false);
                     });
@@ -153,11 +153,11 @@ public class GithubAccountsPane extends RRVBox {
         dialog.showAndWait();
     }
 
-    private void showErrorDialog(String message) {
+    private void showErrorDialog(String messageKey, Object... messageArgs) {
         var alert = new Alert(AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText(LocalizationServiceLocator.getInstance().get(messageKey, messageArgs));
         alert.showAndWait();
     }
 
@@ -167,8 +167,7 @@ public class GithubAccountsPane extends RRVBox {
             try {
                 Desktop.getDesktop().browse(URI.create(url));
                 desktopWorked = true;
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         }
 
         if (desktopWorked) return;
@@ -177,8 +176,7 @@ public class GithubAccountsPane extends RRVBox {
         try {
             new ProcessBuilder("x-www-browser", url).start();
             wwwBrowserWorked = true;
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
         if (wwwBrowserWorked) return;
 
@@ -186,8 +184,7 @@ public class GithubAccountsPane extends RRVBox {
         if (hostServices != null) {
             try {
                 hostServices.showDocument(url);
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         }
     }
 
@@ -215,7 +212,7 @@ public class GithubAccountsPane extends RRVBox {
                             continue;
                         } else {
                             Platform.runLater(() -> {
-                                showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.polling_access_token", errorResponse.getErrorType().toString()));
+                                showErrorDialog("github.accounts.error.polling_access_token", errorResponse.getErrorType());
                                 parentDialog.close();
                                 loadingIndicator.setVisible(false);
                                 authorizeButton.setDisable(false);
@@ -229,7 +226,7 @@ public class GithubAccountsPane extends RRVBox {
                         if (accessToken.isEmpty()) {
                             GithubPlugin.logger.error("Received empty access token");
                             Platform.runLater(() -> {
-                                showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.empty_access_token"));
+                                showErrorDialog("github.accounts.error.empty_access_token");
                                 parentDialog.close();
                                 loadingIndicator.setVisible(false);
                                 authorizeButton.setDisable(false);
@@ -242,7 +239,7 @@ public class GithubAccountsPane extends RRVBox {
                         if (githubUser == null) {
                             GithubPlugin.logger.error("Failed to retrieve user information");
                             Platform.runLater(() -> {
-                                showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.user_info"));
+                                showErrorDialog("github.accounts.error.user_info");
                                 parentDialog.close();
                                 loadingIndicator.setVisible(false);
                                 authorizeButton.setDisable(false);
@@ -270,7 +267,7 @@ public class GithubAccountsPane extends RRVBox {
                 } catch (Exception exception) {
                     GithubPlugin.logger.error("Error while polling for access token", exception);
                     Platform.runLater(() -> {
-                        showErrorDialog(LocalizationServiceLocator.getInstance().get("github.accounts.error.polling_access_token", exception.getMessage()));
+                        showErrorDialog("github.accounts.error.polling_access_token", exception.getMessage());
                         parentDialog.close();
                         loadingIndicator.setVisible(false);
                         authorizeButton.setDisable(false);

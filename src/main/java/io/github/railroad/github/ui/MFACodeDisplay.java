@@ -7,11 +7,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public class MFACodeDisplay extends RRVBox {
-
     private final RRButton openBrowserBtn;
 
     public MFACodeDisplay(String code) {

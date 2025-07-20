@@ -7,9 +7,11 @@ import io.github.railroad.github.data.GithubRepository;
 import io.github.railroad.github.http.GithubRequests;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.NullProgressMonitor;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 
 public class GithubConnection extends AbstractConnection {
@@ -57,15 +59,18 @@ public class GithubConnection extends AbstractConnection {
     }
 
     @Override
-    public boolean cloneRepo(Repository repository, Path path) {
-        try (Git ignored = Git.cloneRepository()
-                .setURI(repository.getRepositoryCloneURL())
-                .setDirectory(path.toFile())
-                .call()) {
-            return true;
-        } catch (GitAPIException exception) {
-            GithubPlugin.logger.error("Failed to clone repository: " + repository.getRepositoryName(), exception);
-            return false;
-        }
+    public CompletableFuture<Boolean> cloneRepo(Repository repository, Path path) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Git ignored = Git.cloneRepository()
+                    .setURI(repository.getRepositoryCloneURL())
+                    .setDirectory(path.toFile())
+                    .setProgressMonitor(NullProgressMonitor.INSTANCE)
+                    .call()) {
+                return true;
+            } catch (GitAPIException exception) {
+                GithubPlugin.logger.error("Failed to clone repository: " + repository.getRepositoryName(), exception);
+                return false;
+            }
+        });
     }
 }
