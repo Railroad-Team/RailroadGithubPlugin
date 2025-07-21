@@ -1,18 +1,19 @@
-package io.github.railroad.github;
+package dev.railroadide.githubplugin;
 
 import com.google.gson.reflect.TypeToken;
-import io.github.railroad.core.registry.Registry;
-import io.github.railroad.core.secure_storage.SecureTokenStore;
-import io.github.railroad.core.settings.Setting;
-import io.github.railroad.core.settings.SettingCategory;
-import io.github.railroad.core.settings.SettingCodec;
-import io.github.railroad.github.data.GithubAccount;
-import io.github.railroad.github.ui.GithubAccountsPane;
-import io.github.railroad.logger.Logger;
-import io.github.railroad.railroadpluginapi.Plugin;
-import io.github.railroad.railroadpluginapi.PluginContext;
-import io.github.railroad.railroadpluginapi.Registries;
-import io.github.railroad.railroadpluginapi.services.VCSService;
+import dev.railroadide.core.registry.Registry;
+import dev.railroadide.core.secure_storage.SecureTokenStore;
+import dev.railroadide.core.settings.Setting;
+import dev.railroadide.core.settings.SettingCategory;
+import dev.railroadide.core.settings.SettingCodec;
+import dev.railroadide.logger.Logger;
+import dev.railroadide.logger.LoggerManager;
+import dev.railroadide.railroadpluginapi.Plugin;
+import dev.railroadide.railroadpluginapi.PluginContext;
+import dev.railroadide.railroadpluginapi.Registries;
+import dev.railroadide.railroadpluginapi.services.VCSService;
+import dev.railroadide.githubplugin.data.GithubAccount;
+import dev.railroadide.githubplugin.ui.GithubAccountsPane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +24,14 @@ import java.util.stream.Collectors;
 public class GithubPlugin implements Plugin {
     public static final SecureTokenStore TOKEN_STORAGE = new SecureTokenStore("github");
 
-    public static Logger logger;
+    public static final Logger LOGGER = LoggerManager.create(GithubPlugin.class).build();
 
     @Override
     public void onEnable(PluginContext context) {
         if (context == null)
             throw new IllegalArgumentException("PluginContext cannot be null");
 
-        logger = context.getLogger(); // TODO: setLogger
+        context.setLogger(LOGGER);
 
         VCSService vcsService = context.getService(VCSService.class);
         if (vcsService == null)
@@ -75,13 +76,13 @@ public class GithubPlugin implements Plugin {
                     for (GithubAccount account : addedAccounts) {
                         GithubPlugin.TOKEN_STORAGE.saveToken(account.getAndClearAccessToken(), "railroad_github_access_token_" + account.getUserId());
                         vcsService.addProfile(account);
-                        logger.info("Added Github account: userId={}, alias={}", account.getUserId(), account.getAlias());
+                        LOGGER.info("Added Github account: userId={}, alias={}", account.getUserId(), account.getAlias());
                     }
 
                     for (GithubAccount account : removedAccounts) {
                         GithubPlugin.TOKEN_STORAGE.clearToken("railroad_github_access_token_" + account.getUserId());
                         vcsService.removeProfile(account);
-                        logger.info("Removed Github account: userId={}, alias={}", account.getUserId(), account.getAlias());
+                        LOGGER.info("Removed Github account: userId={}, alias={}", account.getUserId(), account.getAlias());
                     }
                 })
                 .build());

@@ -2,7 +2,7 @@
   "id": "github",
   "name": "GitHub Integration",
   "version": "1.0.0",
-  "mainClass": "io.github.railroad.github.GithubPlugin",
+  "mainClass": "dev.railroadide.githubplugin.GithubPlugin",
   "description": "A plugin to integrate GitHub features into Railroad",
   "author": "TurtyWurty",
   "license": "MIT"

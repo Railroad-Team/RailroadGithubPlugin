@@ -1,6 +1,6 @@
-package io.github.railroad.github.util;
+package dev.railroadide.githubplugin.util;
 
-import io.github.railroad.github.data.GithubAccount;
+import dev.railroadide.githubplugin.data.GithubAccount;
 import javafx.scene.image.Image;
 
 import java.util.Map;

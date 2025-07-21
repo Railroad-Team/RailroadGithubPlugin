@@ -1,10 +1,10 @@
-package io.github.railroad.github.http;
+package dev.railroadide.githubplugin.http;
 
 import com.google.gson.JsonObject;
-import io.github.railroad.core.gson.GsonLocator;
-import io.github.railroad.github.GithubPlugin;
-import io.github.railroad.github.data.GithubRepository;
-import io.github.railroad.github.data.GithubUser;
+import dev.railroadide.core.gson.GsonLocator;
+import dev.railroadide.githubplugin.GithubPlugin;
+import dev.railroadide.githubplugin.data.GithubRepository;
+import dev.railroadide.githubplugin.data.GithubUser;
 import lombok.NonNull;
 
 import java.net.URI;
@@ -100,7 +100,7 @@ public class GithubRequests {
 
             return GithubUser.fromJson(json);
         } catch (Exception exception) {
-            GithubPlugin.logger.error("Error while requesting user information", exception);
+            GithubPlugin.LOGGER.error("Error while requesting user information", exception);
             return null;
         }
     }

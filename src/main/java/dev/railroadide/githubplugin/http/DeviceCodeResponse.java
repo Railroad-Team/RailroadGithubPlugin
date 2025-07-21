@@ -1,4 +1,4 @@
-package io.github.railroad.github.http;
+package dev.railroadide.githubplugin.http;
 
 import com.google.gson.JsonObject;
 

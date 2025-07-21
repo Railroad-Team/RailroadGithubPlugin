@@ -1,17 +1,17 @@
-package io.github.railroad.github.data;
+package dev.railroadide.githubplugin.data;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import io.github.railroad.core.gson.GsonLocator;
-import io.github.railroad.core.vcs.Repository;
-import io.github.railroad.core.vcs.RepositoryTypes;
+import dev.railroadide.core.gson.GsonLocator;
+import dev.railroadide.core.vcs.Repository;
+import dev.railroadide.core.vcs.RepositoryTypes;
 import lombok.Getter;
 
 import java.util.Map;
 
-import static io.github.railroad.github.util.JsonUtils.*;
+import static dev.railroadide.githubplugin.util.JsonUtils.*;
 
 @Getter
 public class GithubRepository extends Repository {

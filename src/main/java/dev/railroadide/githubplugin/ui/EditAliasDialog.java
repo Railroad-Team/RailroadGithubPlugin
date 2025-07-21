@@ -1,11 +1,11 @@
-package io.github.railroad.github.ui;
+package dev.railroadide.githubplugin.ui;
 
-import io.github.railroad.core.localization.LocalizationServiceLocator;
-import io.github.railroad.core.ui.RRTextField;
-import io.github.railroad.core.ui.RRVBox;
-import io.github.railroad.core.ui.localized.LocalizedLabel;
-import io.github.railroad.core.ui.localized.LocalizedTooltip;
-import io.github.railroad.github.data.GithubAccount;
+import dev.railroadide.core.localization.LocalizationServiceLocator;
+import dev.railroadide.core.ui.RRTextField;
+import dev.railroadide.core.ui.RRVBox;
+import dev.railroadide.core.ui.localized.LocalizedLabel;
+import dev.railroadide.core.ui.localized.LocalizedTooltip;
+import dev.railroadide.githubplugin.data.GithubAccount;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;

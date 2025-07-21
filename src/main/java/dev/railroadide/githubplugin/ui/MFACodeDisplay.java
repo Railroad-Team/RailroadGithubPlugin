@@ -1,8 +1,8 @@
-package io.github.railroad.github.ui;
+package dev.railroadide.githubplugin.ui;
 
-import io.github.railroad.core.ui.RRButton;
-import io.github.railroad.core.ui.RRHBox;
-import io.github.railroad.core.ui.RRVBox;
+import dev.railroadide.core.ui.RRButton;
+import dev.railroadide.core.ui.RRHBox;
+import dev.railroadide.core.ui.RRVBox;
 import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;

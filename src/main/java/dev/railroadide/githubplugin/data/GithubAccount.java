@@ -1,17 +1,17 @@
-package io.github.railroad.github.data;
+package dev.railroadide.githubplugin.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import dev.railroadide.core.vcs.connections.AbstractConnection;
+import dev.railroadide.core.vcs.connections.ProfileType;
+import dev.railroadide.core.vcs.connections.VCSProfile;
 import io.github.palexdev.mfxresources.fonts.IconsProviders;
 import io.github.palexdev.mfxresources.fonts.fontawesome.FontAwesomeBrands;
-import io.github.railroad.core.vcs.connections.AbstractConnection;
-import io.github.railroad.core.vcs.connections.ProfileType;
-import io.github.railroad.core.vcs.connections.VCSProfile;
-import io.github.railroad.github.GithubConnection;
-import io.github.railroad.github.GithubPlugin;
-import io.github.railroad.github.http.GithubRequests;
-import io.github.railroad.github.util.JsonUtils;
+import dev.railroadide.githubplugin.GithubConnection;
+import dev.railroadide.githubplugin.GithubPlugin;
+import dev.railroadide.githubplugin.http.GithubRequests;
+import dev.railroadide.githubplugin.util.JsonUtils;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class GithubAccount extends VCSProfile {
     }
 
     public static List<GithubAccount> listFromJson(JsonElement json) {
-        GithubPlugin.logger.debug("Loading Github accounts from JSON, json: {}", json);
+        GithubPlugin.LOGGER.debug("Loading Github accounts from JSON, json: {}", json);
 
         if (json == null || !json.isJsonArray())
             return new ArrayList<>();
@@ -64,7 +64,7 @@ public class GithubAccount extends VCSProfile {
             account.aliasProperty().set(alias);
             accounts.add(account);
 
-            GithubPlugin.logger.debug("Loaded Github account: userId={}, alias={}", userId, alias);
+            GithubPlugin.LOGGER.debug("Loaded Github account: userId={}, alias={}", userId, alias);
         }
 
         return accounts;

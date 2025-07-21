@@ -1,4 +1,4 @@
-package io.github.railroad.github.util;
+package dev.railroadide.githubplugin.util;
 
 import com.google.gson.JsonObject;
 

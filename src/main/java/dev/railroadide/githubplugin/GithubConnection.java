@@ -1,10 +1,10 @@
-package io.github.railroad.github;
+package dev.railroadide.githubplugin;
 
-import io.github.railroad.core.vcs.Repository;
-import io.github.railroad.core.vcs.connections.AbstractConnection;
-import io.github.railroad.github.data.GithubAccount;
-import io.github.railroad.github.data.GithubRepository;
-import io.github.railroad.github.http.GithubRequests;
+import dev.railroadide.core.vcs.Repository;
+import dev.railroadide.core.vcs.connections.AbstractConnection;
+import dev.railroadide.githubplugin.data.GithubAccount;
+import dev.railroadide.githubplugin.data.GithubRepository;
+import dev.railroadide.githubplugin.http.GithubRequests;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.NullProgressMonitor;
@@ -42,7 +42,7 @@ public class GithubConnection extends AbstractConnection {
 
             @Override
             public void onError(Throwable error) {
-                GithubPlugin.logger.error("Failed to fetch repositories for account: " + account.getAlias(), error);
+                GithubPlugin.LOGGER.error("Failed to fetch repositories for account: " + account.getAlias(), error);
                 if (subscription != null) {
                     subscription.cancel();
                 }
@@ -50,7 +50,7 @@ public class GithubConnection extends AbstractConnection {
 
             @Override
             public void onComplete() {
-                GithubPlugin.logger.info("Fetched " + getRepositories().size() + " repositories for account: " + account.getAlias());
+                GithubPlugin.LOGGER.info("Fetched " + getRepositories().size() + " repositories for account: " + account.getAlias());
             }
         };
 
@@ -68,7 +68,7 @@ public class GithubConnection extends AbstractConnection {
                     .call()) {
                 return true;
             } catch (GitAPIException exception) {
-                GithubPlugin.logger.error("Failed to clone repository: " + repository.getRepositoryName(), exception);
+                GithubPlugin.LOGGER.error("Failed to clone repository: " + repository.getRepositoryName(), exception);
                 return false;
             }
         });

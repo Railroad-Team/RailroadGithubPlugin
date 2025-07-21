@@ -1,15 +1,15 @@
-package io.github.railroad.github.ui;
+package dev.railroadide.githubplugin.ui;
 
+import dev.railroadide.core.localization.LocalizationServiceLocator;
+import dev.railroadide.core.ui.RRButton;
+import dev.railroadide.core.ui.RRHBox;
+import dev.railroadide.core.ui.RRStackPane;
+import dev.railroadide.core.ui.RRVBox;
+import dev.railroadide.core.ui.localized.LocalizedTooltip;
 import io.github.palexdev.mfxresources.fonts.MFXFontIcon;
 import io.github.palexdev.mfxresources.fonts.fontawesome.FontAwesomeSolid;
-import io.github.railroad.core.localization.LocalizationServiceLocator;
-import io.github.railroad.core.ui.RRButton;
-import io.github.railroad.core.ui.RRHBox;
-import io.github.railroad.core.ui.RRStackPane;
-import io.github.railroad.core.ui.RRVBox;
-import io.github.railroad.core.ui.localized.LocalizedTooltip;
-import io.github.railroad.github.data.GithubAccount;
-import io.github.railroad.github.util.GithubAvatar;
+import dev.railroadide.githubplugin.data.GithubAccount;
+import dev.railroadide.githubplugin.util.GithubAvatar;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;

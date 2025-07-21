@@ -1,8 +1,8 @@
-package io.github.railroad.github.data;
+package dev.railroadide.githubplugin.data;
 
 import com.google.gson.JsonObject;
 
-import static io.github.railroad.github.util.JsonUtils.*;
+import static dev.railroadide.githubplugin.util.JsonUtils.*;
 
 public record GithubUser(String login, int id, String nodeId, String avatarUrl, String gravatarId, String url,
                          String htmlUrl, String followersUrl, String followingUrl, String gistsUrl, String starredUrl,
