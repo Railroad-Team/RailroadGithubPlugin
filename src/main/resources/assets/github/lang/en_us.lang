@@ -26,3 +26,4 @@ github.accounts.error.user_info=Failed to retrieve user information
 github.account.ellipsis.tooltip=Show account actions
 github.account.remove.tooltip=Remove this account
 github.account.edit_alias.tooltip=Edit this account's alias
+github.profile_type.name=GitHub

@@ -14,6 +14,8 @@ import dev.railroadide.railroadpluginapi.Registries;
 import dev.railroadide.railroadpluginapi.services.VCSService;
 import dev.railroadide.githubplugin.data.GithubAccount;
 import dev.railroadide.githubplugin.ui.GithubAccountsPane;
+import javafx.application.HostServices;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,9 @@ public class GithubPlugin implements Plugin {
 
     public static final Logger LOGGER = LoggerManager.create(GithubPlugin.class).build();
 
+    @Getter
+    private static HostServices hostServices;
+
     @Override
     public void onEnable(PluginContext context) {
         if (context == null)
@@ -36,6 +41,10 @@ public class GithubPlugin implements Plugin {
         VCSService vcsService = context.getService(VCSService.class);
         if (vcsService == null)
             throw new IllegalStateException("VCSService is not available in the context.");
+
+        hostServices = context.getService(HostServices.class);
+        if (hostServices == null)
+            throw new IllegalStateException("HostServices is not available in the context.");
 
         SettingCodec<List<GithubAccount>, GithubAccountsPane> codec = SettingCodec.<List<GithubAccount>, GithubAccountsPane>builder()
                 .id("github:accounts")
@@ -92,5 +101,7 @@ public class GithubPlugin implements Plugin {
     public void onDisable(PluginContext context) {
         Registry<Setting<?>> settingRegistry = Registries.getSettingsRegistry(context);
         settingRegistry.unregister("github:accounts");
+
+        hostServices = null;
     }
 }

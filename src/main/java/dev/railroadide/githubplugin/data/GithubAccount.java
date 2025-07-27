@@ -20,7 +20,7 @@ import java.util.List;
 
 @Getter
 public class GithubAccount extends VCSProfile {
-    private static final ProfileType TYPE = new ProfileType("Github", FontAwesomeBrands.GITHUB.getDescription(), IconsProviders.FONTAWESOME_BRANDS);
+    private static final ProfileType TYPE = new ProfileType("github.profile_type.name", FontAwesomeBrands.GITHUB.getDescription(), IconsProviders.FONTAWESOME_BRANDS);
 
     private final int userId;
     private GithubUser user;

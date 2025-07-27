@@ -14,6 +14,7 @@ import dev.railroadide.githubplugin.data.GithubUser;
 import dev.railroadide.githubplugin.http.AccessTokenResponse;
 import dev.railroadide.githubplugin.http.DeviceCodeResponse;
 import dev.railroadide.githubplugin.http.GithubRequests;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -180,12 +181,10 @@ public class GithubAccountsPane extends RRVBox {
 
         if (wwwBrowserWorked) return;
 
-        HostServicesDelegate hostServices = HostServicesDelegate.getInstance(null);
-        if (hostServices != null) {
-            try {
-                hostServices.showDocument(url);
-            } catch (Exception ignored) {}
-        }
+        HostServices hostServices = GithubPlugin.getHostServices();
+        try {
+            hostServices.showDocument(url);
+        } catch (Exception ignored) {}
     }
 
     public List<GithubAccount> getAccounts() {
