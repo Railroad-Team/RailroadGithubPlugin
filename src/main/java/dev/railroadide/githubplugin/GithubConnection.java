@@ -42,7 +42,7 @@ public class GithubConnection extends AbstractConnection {
 
             @Override
             public void onError(Throwable error) {
-                GithubPlugin.LOGGER.error("Failed to fetch repositories for account: " + account.getAlias(), error);
+                GithubPlugin.getLogger().error("Failed to fetch repositories for account: " + account.getAlias(), error);
                 if (subscription != null) {
                     subscription.cancel();
                 }
@@ -50,7 +50,7 @@ public class GithubConnection extends AbstractConnection {
 
             @Override
             public void onComplete() {
-                GithubPlugin.LOGGER.info("Fetched " + getRepositories().size() + " repositories for account: " + account.getAlias());
+                GithubPlugin.getLogger().info("Fetched " + getRepositories().size() + " repositories for account: " + account.getAlias());
             }
         };
 
@@ -68,7 +68,7 @@ public class GithubConnection extends AbstractConnection {
                     .call()) {
                 return true;
             } catch (GitAPIException exception) {
-                GithubPlugin.LOGGER.error("Failed to clone repository: " + repository.getRepositoryName(), exception);
+                GithubPlugin.getLogger().error("Failed to clone repository: " + repository.getRepositoryName(), exception);
                 return false;
             }
         });

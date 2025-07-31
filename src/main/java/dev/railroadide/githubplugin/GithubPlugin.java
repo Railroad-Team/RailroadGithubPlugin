@@ -7,7 +7,6 @@ import dev.railroadide.core.settings.Setting;
 import dev.railroadide.core.settings.SettingCategory;
 import dev.railroadide.core.settings.SettingCodec;
 import dev.railroadide.logger.Logger;
-import dev.railroadide.logger.LoggerManager;
 import dev.railroadide.railroadpluginapi.Plugin;
 import dev.railroadide.railroadpluginapi.PluginContext;
 import dev.railroadide.railroadpluginapi.Registries;
@@ -26,7 +25,8 @@ import java.util.stream.Collectors;
 public class GithubPlugin implements Plugin {
     public static final SecureTokenStore TOKEN_STORAGE = new SecureTokenStore("github");
 
-    public static final Logger LOGGER = LoggerManager.create(GithubPlugin.class).build();
+    @Getter
+    private static Logger logger;
 
     @Getter
     private static HostServices hostServices;
@@ -36,7 +36,7 @@ public class GithubPlugin implements Plugin {
         if (context == null)
             throw new IllegalArgumentException("PluginContext cannot be null");
 
-        context.setLogger(LOGGER);
+        logger = context.getLogger();
 
         VCSService vcsService = context.getService(VCSService.class);
         if (vcsService == null)
@@ -85,13 +85,13 @@ public class GithubPlugin implements Plugin {
                     for (GithubAccount account : addedAccounts) {
                         GithubPlugin.TOKEN_STORAGE.saveToken(account.getAndClearAccessToken(), "railroad_github_access_token_" + account.getUserId());
                         vcsService.addProfile(account);
-                        LOGGER.info("Added Github account: userId={}, alias={}", account.getUserId(), account.getAlias());
+                        logger.info("Added Github account: userId={}, alias={}", account.getUserId(), account.getAlias());
                     }
 
                     for (GithubAccount account : removedAccounts) {
                         GithubPlugin.TOKEN_STORAGE.clearToken("railroad_github_access_token_" + account.getUserId());
                         vcsService.removeProfile(account);
-                        LOGGER.info("Removed Github account: userId={}, alias={}", account.getUserId(), account.getAlias());
+                        logger.info("Removed Github account: userId={}, alias={}", account.getUserId(), account.getAlias());
                     }
                 })
                 .build());

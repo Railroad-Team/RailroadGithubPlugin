@@ -100,7 +100,7 @@ public class GithubRequests {
 
             return GithubUser.fromJson(json);
         } catch (Exception exception) {
-            GithubPlugin.LOGGER.error("Error while requesting user information", exception);
+            GithubPlugin.getLogger().error("Error while requesting user information", exception);
             return null;
         }
     }

@@ -203,11 +203,11 @@ public class GithubAccountsPane extends RRVBox {
                     if (response instanceof AccessTokenResponse.ErrorResponse errorResponse) {
                         if (errorResponse.getErrorType() == AccessTokenResponse.ErrorType.AUTHORIZATION_PENDING) {
                             Thread.sleep(interval * 1000L);
-                            GithubPlugin.LOGGER.debug("Polling for access token, waiting for {} seconds", interval);
+                            GithubPlugin.getLogger().debug("Polling for access token, waiting for {} seconds", interval);
                             continue;
                         } else if (errorResponse.getErrorType() == AccessTokenResponse.ErrorType.SLOW_DOWN) {
                             Thread.sleep((interval + 5) * 1000L);
-                            GithubPlugin.LOGGER.debug("Polling for access token, slowing down, waiting for {} seconds", interval + 5);
+                            GithubPlugin.getLogger().debug("Polling for access token, slowing down, waiting for {} seconds", interval + 5);
                             continue;
                         } else {
                             Platform.runLater(() -> {
@@ -223,7 +223,7 @@ public class GithubAccountsPane extends RRVBox {
                     if (response instanceof AccessTokenResponse.SuccessResponse successResponse) {
                         String accessToken = successResponse.getAccessToken();
                         if (accessToken.isEmpty()) {
-                            GithubPlugin.LOGGER.error("Received empty access token");
+                            GithubPlugin.getLogger().error("Received empty access token");
                             Platform.runLater(() -> {
                                 showErrorDialog("github.accounts.error.empty_access_token");
                                 parentDialog.close();
@@ -233,10 +233,10 @@ public class GithubAccountsPane extends RRVBox {
                             break;
                         }
 
-                        GithubPlugin.LOGGER.debug("Successfully received access token");
+                        GithubPlugin.getLogger().debug("Successfully received access token");
                         GithubUser githubUser = GithubRequests.requestUser(accessToken);
                         if (githubUser == null) {
-                            GithubPlugin.LOGGER.error("Failed to retrieve user information");
+                            GithubPlugin.getLogger().error("Failed to retrieve user information");
                             Platform.runLater(() -> {
                                 showErrorDialog("github.accounts.error.user_info");
                                 parentDialog.close();
@@ -246,13 +246,13 @@ public class GithubAccountsPane extends RRVBox {
                             break;
                         }
 
-                        GithubPlugin.LOGGER.debug("Successfully retrieved user information: {}", githubUser);
+                        GithubPlugin.getLogger().debug("Successfully retrieved user information: {}", githubUser);
                         var account = new GithubAccount(githubUser);
                         account.aliasProperty().set(githubUser.login() == null ? githubUser.name() : githubUser.login());
                         account.setAccessToken(accessToken.toCharArray());
                         Platform.runLater(() -> {
                             accountsListView.getItems().add(account);
-                            GithubPlugin.LOGGER.info("Added new GitHub account: {}", githubUser.login());
+                            GithubPlugin.getLogger().info("Added new GitHub account: {}", githubUser.login());
                             parentDialog.close();
                             loadingIndicator.setVisible(false);
                             authorizeButton.setDisable(false);
@@ -261,10 +261,10 @@ public class GithubAccountsPane extends RRVBox {
                     }
                 } catch (InterruptedException exception) {
                     Thread.currentThread().interrupt();
-                    GithubPlugin.LOGGER.debug("Polling for access token interrupted");
+                    GithubPlugin.getLogger().debug("Polling for access token interrupted");
                     return;
                 } catch (Exception exception) {
-                    GithubPlugin.LOGGER.error("Error while polling for access token", exception);
+                    GithubPlugin.getLogger().error("Error while polling for access token", exception);
                     Platform.runLater(() -> {
                         showErrorDialog("github.accounts.error.polling_access_token", exception.getMessage());
                         parentDialog.close();

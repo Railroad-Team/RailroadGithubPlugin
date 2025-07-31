@@ -44,7 +44,7 @@ public class GithubAccount extends VCSProfile {
     }
 
     public static List<GithubAccount> listFromJson(JsonElement json) {
-        GithubPlugin.LOGGER.debug("Loading Github accounts from JSON, json: {}", json);
+        GithubPlugin.getLogger().debug("Loading Github accounts from JSON, json: {}", json);
 
         if (json == null || !json.isJsonArray())
             return new ArrayList<>();
@@ -64,7 +64,7 @@ public class GithubAccount extends VCSProfile {
             account.aliasProperty().set(alias);
             accounts.add(account);
 
-            GithubPlugin.LOGGER.debug("Loaded Github account: userId={}, alias={}", userId, alias);
+            GithubPlugin.getLogger().debug("Loaded Github account: userId={}, alias={}", userId, alias);
         }
 
         return accounts;
